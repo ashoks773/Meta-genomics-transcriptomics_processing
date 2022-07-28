@@ -1,0 +1,1 @@
+cat fastqfiles | while read line; do qsub -q 256gb.q,matlab.q,cgroup.q -cwd -o $PWD -e $PWD -I mem_free=16G -pe mpich 4 ./senhuman.singlelibrary $line; done

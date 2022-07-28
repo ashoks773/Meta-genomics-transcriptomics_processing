@@ -1,0 +1,7 @@
+#!/bin/bash
+ 
+source /hpc/apps/miniconda/3/etc/profile.d/conda.sh 
+conda activate biobakery3 
+module load bowtie/2.3.2 
+humann -i /home/sharmaa4/common/MTX/$1 --input-format fastq.gz -o humann_results --nucleotide-database /home/sharmaa4/Databases/human_database/chocophlan.v
+296_201901b --protein-database /home/sharmaa4/Databases/human_database/uniref --threads 4 --resume
