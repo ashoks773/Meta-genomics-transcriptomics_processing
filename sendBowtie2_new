@@ -1,0 +1,37 @@
+#!/bin/bash
+ 
+module load bowtie/2.3.2 
+module load samtools
+
+#zcat /home/sharmaa4/IBD_datasets/HMP2/WGS_rawReads/"$1"_R1.fastq.gz /home/sharmaa4/IBD_datasets/HMP2/WGS_rawReads/"$1"_R2.fastq.gz > Merged_Fastq/"$1"_Merged.fastq 
+time bowtie2 --local -x ~/Databases/human_database/Full_chocophlan_index/Chocophlan_Database -1 ../../"$1"_R1.fastq.gz -2 ../../"$1"_R2.fastq.gz -S "$1"_PairedEndMapping.sam -p 24 -L 25 --no-head #Seed Length=25
+time grep "YT:Z:CP" "$1"_PairedEndMapping.sam | cut -f3,9 | awk 'NR%2==1' | cut -d"|" -f3 | sort | uniq -c > "$1".counts.txt #-1. Get reads which aligned concordantly, 2. For both pairs there are two lines, 3. Awk to take one line pick second line here, 4. Take uniref90 id which is seperated by | and then unique counts
+sed -r 's/^\s+//g' "$1".counts.txt > "$1"_counts_format.txt
+cut -d" " -f2 "$1"_counts_format.txt > "$1"_uniRefid.txt
+cut -d" " -f1 "$1"_counts_format.txt > "$1"_uniRefCount.txt
+paste -d"," "$1"_uniRefid.txt "$1"_uniRefCount.txt > "$1"_counts_new.txt
+echo -e "UniRefID,$1" > "$1"_counts_Final.csv && cat "$1"_counts_new.txt >> "$1"_counts_Final.csv
+
+##samtools view "$1".sam | grep "UniRef90" | cut -d"|" -f3 | sort | uniq -c > "$1".counts.txt If I am doing grep from bam file
+#sed -r 's/^\s+//g' "$1".counts.txt > "$1"_counts_format.txt
+#cut -d" " -f2 "$1"_counts_format.txt > "$1"_uniRefid.txt
+#cut -d" " -f1 "$1"_counts_format.txt > "$1"_uniRefCount.txt
+#paste -d"," "$1"_uniRefid.txt "$1"_uniRefCount.txt > "$1"_counts_new.txt
+#echo -e "UniRefID,$1" > "$1"_counts_Final.csv && cat "$1"_counts_new.txt >> "$1"_counts_Final.csv
+#-- rm *txt at last
+#-- mv sam files
+
+#-- Not Used
+#samtools view -bS "$1".sam > "$1".bam
+#samtools sort "$1".bam > "$1".sorted.bam
+#Quality filtering addtional step
+#samtools view -b -F 0x04 -q 1 -o "$1".sorted_mapped.q1.bam "$1".sorted.bam
+#samtools index "$1".sorted_mapped.q1.bam
+#samtools idxstats "$1".sorted_mapped.q1.bam | grep -v "*" | cut -f3 > "$1".counts
+#-- Run these commands at last
+#rm *sam
+#rm *sorted.bam
+#rm *Merged.fastq
+#mv *bam* BAM_Files
+#humann -i "$1"_Merged.fastq --input-format fastq -o humann_results --nucleotide-database /home/sharmaa4/Databases/human_database/chocophlan.v296_201901b --protein-database /home/sharmaa4/Databases/human_database/uniref --threads 4 --resume
+#humann -i /home/sharmaa4/common/MTX/CSM5FZ4M.fastq.gz --input-format fastq.gz -o humann_results --nucleotide-database /home/sharmaa4/Databases/human_database/chocophlan.v296_201901b --protein-database /home/sharmaa4/Databases/human_database/uniref --bypass-translated-search --threads 12

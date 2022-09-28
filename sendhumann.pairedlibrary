@@ -1,0 +1,10 @@
+#!/bin/bash
+ 
+source /hpc/apps/miniconda/3/etc/profile.d/conda.sh 
+conda activate biobakery3 
+module load bowtie/2.3.2 
+
+zcat /home/sharmaa4/IBD_datasets/HMP2/WGS_rawReads/"$1"_R1.fastq.gz /home/sharmaa4/IBD_datasets/HMP2/WGS_rawReads/"$1"_R2.fastq.gz > "$1"_Merged.fastq 
+humann -i "$1"_Merged.fastq --input-format fastq -o humann_results --nucleotide-database /home/sharmaa4/Databases/human_database/chocophlan.v296_201901b --protein-database /home/sharmaa4/Databases/human_database/uniref --threads 4 --resume
+
+#humann -i /home/sharmaa4/common/MTX/CSM5FZ4M.fastq.gz --input-format fastq.gz -o humann_results --nucleotide-database /home/sharmaa4/Databases/human_database/chocophlan.v296_201901b --protein-database /home/sharmaa4/Databases/human_database/uniref --bypass-translated-search --threads 12
